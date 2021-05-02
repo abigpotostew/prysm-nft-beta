@@ -126,12 +126,6 @@ float map(vec3 p)
         0.5
     );
     
-    // move the prysm closer
-    float prysmGoopyness=0.9;
-    float prysmSize = 1.5;
-    d = opSmoothUnion(sdTriPrism(p+vec3(0.0,0.0,1.0), vec2(prysmSize)), d, prysmGoopyness);
-    
-    
     i=2;
     fi = float(i);
     d=opSmoothUnion(
@@ -190,6 +184,14 @@ float map(vec3 p)
                 ),
             d, 
             0.5);
+
+
+    
+    // move the prysm closer
+    float prysmGoopyness=0.9;
+    float prysmSize = 1.5;
+    d = opSmoothUnion(sdTriPrism(p+vec3(0.0,0.0,1.0), vec2(prysmSize)), d, prysmGoopyness);
+    
     
     return d;
 } 
@@ -227,7 +229,7 @@ vec3 calcNormal(  vec3 p )
     }
     
     // background 
-    depth = min(10.0, depth);
+    depth = min(6.0, depth);
     vec3 n = calcNormal(p);
     float topBrightness=0.577;
     float b = max(0.0, dot(n, vec3(topBrightness)));
@@ -236,11 +238,12 @@ vec3 calcNormal(  vec3 p )
     float saturation = 0.8;
     float whiteBalance = 0.5;
     vec3 colorBase = vec3(0.5,3,4);
-    vec3 col = (whiteBalance + saturation * cos((b + colTime) + uv.xyx * 2.0 + colorBase)) * (0.95 + b * 0.95);
+    vec3 col = (whiteBalance + saturation * cos((b + colTime) + uv.xyx * 2.0 + colorBase)) * (0.75 + b * 0.35);
     col *= exp( -depth * 0.15 );
     
     // maximum thickness is 2m in alpha channel
-    return vec4(col, 1.0 );//- (depth - 0.5) / 2.0);
+    // return vec4(col, 3.0 - (depth - 0.5) / 2.0);
+    return vec4(col, 1.0 );
 }
 
 void main() {
