@@ -15,6 +15,93 @@ float opSmoothUnion( float d1, float d2, float k )
     return mix( d2, d1, h ) - k*h*(1.0-h);
 }
 
+mat4 Rot4X(float a ) {
+    float c = cos( a );
+    float s = sin( a );
+    return mat4( 1, 0, 0, 0,
+                 0, c,-s, 0,
+                 0, s, c, 0,
+                 0, 0, 0, 1 );
+}
+
+
+// Return 4x4 rotation Y matrix
+// angle in radians
+// ========================================
+mat4 Rot4Y(float a ) {
+    float c = cos( a );
+    float s = sin( a );
+    return mat4( c, 0, s, 0,
+                 0, 1, 0, 0,
+                -s, 0, c, 0,
+                 0, 0, 0, 1 );
+}
+
+// Return 4x4 rotation Z matrix
+// angle in radians
+// ========================================
+mat4 Rot4Z(float a ) {
+    float c = cos( a );
+    float s = sin( a );
+    return mat4(
+        c,-s, 0, 0,
+        s, c, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+     );
+}
+
+// d = distance to move
+// ========================================
+vec3 opTrans( vec3 p, vec3 d ) {
+    return p - d;
+}
+
+// if no support for GLSL 1.2+
+//     #version 120
+// ========================================
+mat4 transposeM4(in mat4 m ) {
+    vec4 r0 = m[0];
+    vec4 r1 = m[1];
+    vec4 r2 = m[2];
+    vec4 r3 = m[3];
+
+    mat4 t = mat4(
+         vec4( r0.x, r1.x, r2.x, r3.x ),
+         vec4( r0.y, r1.y, r2.y, r3.y ),
+         vec4( r0.z, r1.z, r2.z, r3.z ),
+         vec4( r0.w, r1.w, r2.w, r3.w )
+    );
+    return t;
+}
+
+// Translate is simply: p - d
+// opTx will do transpose(m)
+// p' = m*p
+//    = [m0 m1 m2 m3 ][ p.x ]
+//      [m4 m5 m6 m7 ][ p.y ]
+//      [m8 m9 mA mB ][ p.z ]
+//      [mC mD mE mF ][ 1.0 ]
+// ========================================
+mat4 Loc4( vec3 p ) {
+    p *= -1.;
+    return mat4(
+        1,  0,  0,  p.x,
+        0,  1,  0,  p.y,
+        0,  0,  1,  p.z,
+        0,  0,  0,  1
+    );
+}
+
+// Note: m must already be inverted!
+// TODO: invert(m) transpose(m)
+// Op Rotation / Translation
+// ========================================
+vec3 opTx( vec3 p, mat4 m ) {   // BUG in iq's docs, should be q
+    return (transposeM4(m)*vec4(p,1.0)).xyz;
+}
+
+
 float sdSphere( vec3 p, float s )
 {
   return length(p)-s;
@@ -105,22 +192,26 @@ float map(vec3 p)
 {
     float d = 2.0;
 
-    for (int i = 0; i < 3; i++) {
+    vec3 q = p; // q is tmp variable for changing position for the next op.
+    vec3 spheresRandomVec = vec3(52.5126, 64.62744, 632.25);
+    for (int i = 0; i < 5; i++) {
         float fi = float(i+10);
         float time = u_time * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
+        q = p + sin(time + fi * spheresRandomVec) * vec3(2.0, 2.0, 0.8);
         d = opSmoothUnion(
-            sdSphere(p + sin(time + fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8), mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
+            sdSphere(q, mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
             d,
             0.6
         );
     }
 
+    vec3 otherRandomVec = vec3(52.5126, 64.62744, 632.25);
     int i=1;
     float fi = float(i);
     float time = u_time * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
     d = opSmoothUnion(
         sdSphere(
-            p + sin(time/3.0 + fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8), 
+            p + sin(time/3.0 + fi * otherRandomVec) * vec3(2.0, 2.0, 0.8), 
             mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
         d,
         0.5
@@ -130,7 +221,7 @@ float map(vec3 p)
     fi = float(i);
     d=opSmoothUnion(
             sdSphere(
-                p+sin(time/2.0+ fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8),
+                p+sin(time/2.0+ fi * otherRandomVec) * vec3(2.0, 2.0, 0.8),
                 0.75),//mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
                 //(sin(time/2.0+fi *195.26402)+1.0)/4.0+0.5,
                 //(sin(time/2.0+fi*10.0)+1.0)/4.0+0.5),
@@ -141,7 +232,7 @@ float map(vec3 p)
     fi = float(i);
     d = opSmoothUnion(
         sdSphere(
-            p + sin(time/3.0 + fi * vec3(52.5126, 64.62744, 132.25)) * vec3(2.0, 2.0, 0.8), 
+            p + sin(time/3.0 + fi * otherRandomVec) * vec3(2.0, 2.0, 0.8), 
             mix(0.2, .7, fract(fi * 412.531 + 0.5124))),
         d,
         0.5
@@ -160,8 +251,8 @@ float map(vec3 p)
     // this one flies way out
     d = opSmoothUnion(
             sdRoundCone(
-                p+sin(time/3.0+ fi * vec3(52.5126, 64.62744, 632.25)) * vec3(5.0, 3.0, 0.8),
-                sin(time/3.0+ fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8),
+                p+sin(time/3.0+ fi * otherRandomVec) * vec3(5.0, 3.0, 0.8),
+                sin(time/3.0+ fi * otherRandomVec) * vec3(2.0, 2.0, 0.8),
                 vec3(1.0),//sin(time/3.0+ fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8),
                 .2,
                 .5
@@ -174,9 +265,9 @@ float map(vec3 p)
     fi=float(i);
     d = opSmoothUnion(
             sdRoundCone(
-                p+sin(time/3.0+ fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.4, 3.99, 1.8),
+                p+sin(time/3.0+ fi * otherRandomVec) * vec3(2.4, 3.99, 1.8),
                 vec3(0.1,0.1,0.1),//sin(time/3.0+ fi * vec2(52.5126, 64.62744)) * vec2(1.0, 1.0),
-                sin(time/3.0+ fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8),
+                sin(time/3.0+ fi * otherRandomVec) * vec3(2.0, 2.0, 0.8),
                 0.5,
                 0.32
                 //(sin(time/2.0+fi *195.26402)+1.0)/4.0+0.5
@@ -186,11 +277,14 @@ float map(vec3 p)
             0.5);
 
 
-    
+    float prysmSize = 1.0;
+    q = p;
+    q = opTx( q, Loc4( vec3(0.0,0.0,-prysmSize*1.0) ));
+    q = opTx( q, Rot4X( u_time/3.0 ) ); 
+    q = opTx(q, Rot4Y(u_time/5.0));
     // move the prysm closer
-    float prysmGoopyness=0.9;
-    float prysmSize = 1.5;
-    d = opSmoothUnion(sdTriPrism(p+vec3(0.0,0.0,1.0), vec2(prysmSize)), d, prysmGoopyness);
+    float prysmGoopyness=.9;
+    d = opSmoothUnion(sdTriPrism(q+vec3(0.0,0.0,1.0), vec2(prysmSize)), d, prysmGoopyness);
     
     
     return d;
@@ -229,16 +323,16 @@ vec3 calcNormal(  vec3 p )
     }
     
     // background 
-    depth = min(6.0, depth);
+    depth = min(4.0, depth);
     vec3 n = calcNormal(p);
     float topBrightness=0.577;
     float b = max(0.0, dot(n, vec3(topBrightness)));
     float colTime = 5.8;
-    //float colShift=(sin(u_time)+1.0)/2.0;
+    float colShift=(sin(u_time/10.0)+1.0)/2.0*10.0;
     float saturation = 0.8;
     float whiteBalance = 0.5;
     vec3 colorBase = vec3(0.5,3,4);
-    vec3 col = (whiteBalance + saturation * cos((b + colTime) + uv.xyx * 2.0 + colorBase)) * (0.75 + b * 0.35);
+    vec3 col = (whiteBalance + saturation * cos((b + colTime+colShift) + uv.xyx * 2.0 + colorBase)) * (0.75 + b * 0.35);
     col *= exp( -depth * 0.15 );
     
     // maximum thickness is 2m in alpha channel
