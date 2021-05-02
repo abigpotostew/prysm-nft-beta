@@ -194,49 +194,50 @@ float map(vec3 p)
 
     vec3 q = p; // q is tmp variable for changing position for the next op.
     vec3 spheresRandomVec = vec3(52.5126, 64.62744, 632.25);
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 16 ; i++) {
         float fi = float(i+10);
         float time = u_time * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
         q = p + sin(time + fi * spheresRandomVec) * vec3(2.0, 2.0, 0.8);
+        float radius = mix(0.1, 0.8, fract(fi * 412.531 + 0.5124));
         d = opSmoothUnion(
-            sdSphere(q, mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
+            sdSphere(q, radius),
             d,
-            0.6
+            0.5
         );
     }
 
-    vec3 otherRandomVec = vec3(52.5126, 64.62744, 632.25);
+    vec3 otherRandomVec = vec3(92.5126, 164.62744, 232.25);
     int i=1;
     float fi = float(i);
     float time = u_time * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
-    d = opSmoothUnion(
-        sdSphere(
-            p + sin(time/3.0 + fi * otherRandomVec) * vec3(2.0, 2.0, 0.8), 
-            mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
-        d,
-        0.5
-    );
+    // d = opSmoothUnion(
+    //     sdSphere(
+    //         p + sin(time/3.0 + fi * otherRandomVec) * vec3(2.0, 2.0, 0.8), 
+    //         mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
+    //     d,
+    //     0.5
+    // );
     
-    i=2;
-    fi = float(i);
-    d=opSmoothUnion(
-            sdSphere(
-                p+sin(time/2.0+ fi * otherRandomVec) * vec3(2.0, 2.0, 0.8),
-                0.75),//mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
-                //(sin(time/2.0+fi *195.26402)+1.0)/4.0+0.5,
-                //(sin(time/2.0+fi*10.0)+1.0)/4.0+0.5),
-            d, 
-            0.5);
+    // i=2;
+    // fi = float(i);
+    // d=opSmoothUnion(
+    //         sdSphere(
+    //             p+sin(time/2.0+ fi * otherRandomVec) * vec3(2.0, 2.0, 0.8),
+    //             0.75),//mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
+    //             //(sin(time/2.0+fi *195.26402)+1.0)/4.0+0.5,
+    //             //(sin(time/2.0+fi*10.0)+1.0)/4.0+0.5),
+    //         d, 
+    //         0.5);
     
-    i=11;
-    fi = float(i);
-    d = opSmoothUnion(
-        sdSphere(
-            p + sin(time/3.0 + fi * otherRandomVec) * vec3(2.0, 2.0, 0.8), 
-            mix(0.2, .7, fract(fi * 412.531 + 0.5124))),
-        d,
-        0.5
-    );
+    // i=11;
+    // fi = float(i);
+    // d = opSmoothUnion(
+    //     sdSphere(
+    //         p + sin(time/3.0 + fi * otherRandomVec) * vec3(2.0, 2.0, 0.8), 
+    //         mix(0.2, .7, fract(fi * 412.531 + 0.5124))),
+    //     d,
+    //     0.5
+    // );
      
     /*d = opSmoothUnion(
             sdOctogonPrism(
@@ -246,35 +247,35 @@ float map(vec3 p)
             d, 
             0.6);*/
     
-    i=4;
-    fi=float(i);
-    // this one flies way out
-    d = opSmoothUnion(
-            sdRoundCone(
-                p+sin(time/3.0+ fi * otherRandomVec) * vec3(5.0, 3.0, 0.8),
-                sin(time/3.0+ fi * otherRandomVec) * vec3(2.0, 2.0, 0.8),
-                vec3(1.0),//sin(time/3.0+ fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8),
-                .2,
-                .5
-                //(sin(time/2.0+fi *195.26402)+1.0)/4.0+0.5
-                //(sin(time/2.0+fi*10.0)+1.0)/4.0+0.5
-                ),
-            d, 
-            0.5);
-    i=5;
-    fi=float(i);
-    d = opSmoothUnion(
-            sdRoundCone(
-                p+sin(time/3.0+ fi * otherRandomVec) * vec3(2.4, 3.99, 1.8),
-                vec3(0.1,0.1,0.1),//sin(time/3.0+ fi * vec2(52.5126, 64.62744)) * vec2(1.0, 1.0),
-                sin(time/3.0+ fi * otherRandomVec) * vec3(2.0, 2.0, 0.8),
-                0.5,
-                0.32
-                //(sin(time/2.0+fi *195.26402)+1.0)/4.0+0.5
-                //(sin(time/2.0+fi*10.0)+1.0)/4.0+0.5
-                ),
-            d, 
-            0.5);
+    // i=4;
+    // fi=float(i);
+    // // this one flies way out
+    // d = opSmoothUnion(
+    //         sdRoundCone(
+    //             p+sin(time/3.0+ fi * otherRandomVec) * vec3(5.0, 3.0, 0.8),
+    //             sin(time/3.0+ fi * otherRandomVec) * vec3(2.0, 2.0, 0.8),
+    //             vec3(1.0),//sin(time/3.0+ fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8),
+    //             .2,
+    //             .5
+    //             //(sin(time/2.0+fi *195.26402)+1.0)/4.0+0.5
+    //             //(sin(time/2.0+fi*10.0)+1.0)/4.0+0.5
+    //             ),
+    //         d, 
+    //         0.5);
+    // i=5;
+    // fi=float(i);
+    // d = opSmoothUnion(
+    //         sdRoundCone(
+    //             p+sin(time/3.0+ fi * otherRandomVec) * vec3(2.4, 3.99, 1.8),
+    //             vec3(0.1,0.1,0.1),//sin(time/3.0+ fi * vec2(52.5126, 64.62744)) * vec2(1.0, 1.0),
+    //             sin(time/3.0+ fi * otherRandomVec) * vec3(2.0, 2.0, 0.8),
+    //             0.5,
+    //             0.32
+    //             //(sin(time/2.0+fi *195.26402)+1.0)/4.0+0.5
+    //             //(sin(time/2.0+fi*10.0)+1.0)/4.0+0.5
+    //             ),
+    //         d, 
+    //         0.5);
 
 
     float prysmSize = 1.0;
@@ -329,7 +330,7 @@ vec3 calcNormal(  vec3 p )
     float b = max(0.0, dot(n, vec3(topBrightness)));
     float colTime = 5.8;// nice starting color
     
-    float colShift=(sin(u_time/10.0)+1.0)/2.0*10.0;
+    float colShift=u_time/8.0;//(sin(u_time/10.0)+1.0)/2.0*10.0;
     colTime += colShift;
     float saturation = 0.7;
     float whiteBalance = 0.4;
