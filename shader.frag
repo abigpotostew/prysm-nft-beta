@@ -126,7 +126,10 @@ float map(vec3 p)
         0.5
     );
     
-    d = opSmoothUnion(sdTriPrism(p, vec2(1.0,1.0)), d, 0.9);
+    // move the prysm closer
+    float prysmGoopyness=0.2;
+    float prysmSize = 2.0;
+    d = opSmoothUnion(sdTriPrism(p+vec3(0.0,0.0,0.6), vec2(prysmSize)), d, prysmGoopyness);
     
     
     i=2;
@@ -201,13 +204,14 @@ vec3 calcNormal( in vec3 p )
                       k.xxx*map( p + k.xxx*h ) );
 }
 
- vec4  mainImage(  vec2 fragCoord )
+ vec4 mainImage(  vec2 fragCoord )
 {
 
     vec2 uv = fragCoord/u_resolution.xy;
     
     // screen size is 6m x 6m
-    vec3 rayOri = vec3((uv - 0.5) * vec2(u_resolution.x/u_resolution.y, 1.0) * 6.0, 3.0);
+    float screenSize=6.0;
+    vec3 rayOri = vec3((uv - 0.5) * vec2(u_resolution.x/u_resolution.y, 1.0) * screenSize, 2.0);
     vec3 rayDir = vec3(0.0, 0.0, -1.0);
     
     float depth = 0.0;
@@ -222,7 +226,8 @@ vec3 calcNormal( in vec3 p )
         }
     }
     
-    depth = min(8.0, depth);
+    // background 
+    depth = min(10.0, depth);
     vec3 n = calcNormal(p);
     float topBrightness=0.577;
     float b = max(0.0, dot(n, vec3(topBrightness)));
@@ -232,7 +237,7 @@ vec3 calcNormal( in vec3 p )
     float whiteBalance = 0.5;
     vec3 colorBase = vec3(0.5,3,4);
     vec3 col = (whiteBalance + saturation * cos((b + colTime) + uv.xyx * 2.0 + colorBase)) * (0.75 + b * 0.35);
-    col *= exp( -depth * 0.15 );
+    col *= exp( -depth * 0.005 );
     
     // maximum thickness is 2m in alpha channel
     return vec4(col, 1.0 - (depth - 0.5) / 2.0);
