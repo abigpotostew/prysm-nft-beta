@@ -1,3 +1,11 @@
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+
+uniform float u_time;
+uniform vec2 u_resolution;
+
 float dot2( in vec2 v ) { return dot(v,v); }
 float dot2( in vec3 v ) { return dot(v,v); }
 float ndot( in vec2 a, in vec2 b ) { return a.x*b.x - a.y*b.y; }
@@ -15,7 +23,7 @@ float sdSphere( vec3 p, float s )
 
 float sdTriPrism( vec3 p, vec2 h )
 {
-    const float k = sqrt(3.0);
+    float k = sqrt(3.0);
     h.x *= 0.5*k;
     p.xy /= h.x;
     p.x = abs(p.x) - 1.0;
@@ -30,7 +38,7 @@ float sdTriPrism( vec3 p, vec2 h )
 
 float sdOctogonPrism( in vec3 p, in float r, float h )
 {
-  const vec3 k = vec3(-0.9238795325,   // sqrt(2+sqrt(2))/2 
+  vec3 k = vec3(-0.9238795325,   // sqrt(2+sqrt(2))/2 
                        0.3826834323,   // sqrt(2-sqrt(2))/2
                        0.4142135623 ); // sqrt(2)-1 
   // reflections
@@ -99,7 +107,7 @@ float map(vec3 p)
 
     for (int i = 0; i < 16; i++) {
         float fi = float(i+10);
-        float time = iTime * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
+        float time = u_time * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
         d = opSmoothUnion(
             sdSphere(p + sin(time + fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8), mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
             d,
@@ -109,7 +117,7 @@ float map(vec3 p)
 
     int i=1;
     float fi = float(i);
-    float time = iTime * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
+    float time = u_time * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
     d = opSmoothUnion(
         sdSphere(
             p + sin(time/3.0 + fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8), 
@@ -185,20 +193,21 @@ float map(vec3 p)
 
 vec3 calcNormal( in vec3 p )
 {
-    const float h = 1e-5; // or some other value
-    const vec2 k = vec2(1,-1);
+    float h = 1e-5; // or some other value
+    vec2 k = vec2(1,-1);
     return normalize( k.xyy*map( p + k.xyy*h ) + 
                       k.yyx*map( p + k.yyx*h ) + 
                       k.yxy*map( p + k.yxy*h ) + 
                       k.xxx*map( p + k.xxx*h ) );
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+ vec4  mainImage(  vec2 fragCoord )
 {
-    vec2 uv = fragCoord/iResolution.xy;
+
+    vec2 uv = fragCoord/u_resolution.xy;
     
     // screen size is 6m x 6m
-    vec3 rayOri = vec3((uv - 0.5) * vec2(iResolution.x/iResolution.y, 1.0) * 6.0, 3.0);
+    vec3 rayOri = vec3((uv - 0.5) * vec2(u_resolution.x/u_resolution.y, 1.0) * 6.0, 3.0);
     vec3 rayDir = vec3(0.0, 0.0, -1.0);
     
     float depth = 0.0;
@@ -218,7 +227,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     float topBrightness=0.577;
     float b = max(0.0, dot(n, vec3(topBrightness)));
     float colTime = 5.8;
-    //float colShift=(sin(iTime)+1.0)/2.0;
+    //float colShift=(sin(u_time)+1.0)/2.0;
     float saturation = 0.8;
     float whiteBalance = 0.5;
     vec3 colorBase = vec3(0.5,3,4);
@@ -226,13 +235,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     col *= exp( -depth * 0.15 );
     
     // maximum thickness is 2m in alpha channel
-    fragColor = vec4(col, 1.0 - (depth - 0.5) / 2.0);
+    return vec4(col, 1.0 - (depth - 0.5) / 2.0);
 }
 
-/** SHADERDATA
-{
-    "title": "My Shader 0",
-    "description": "Lorem ipsum dolor",
-    "model": "person"
+void main() {
+
+    gl_FragColor = mainImage(gl_FragCoord.xy);//vec4(1.0,0.0,1.0,1.0);
 }
-*/
