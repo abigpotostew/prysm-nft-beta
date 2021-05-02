@@ -105,7 +105,7 @@ float map(vec3 p)
 {
     float d = 2.0;
 
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 3; i++) {
         float fi = float(i+10);
         float time = u_time * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
         d = opSmoothUnion(
@@ -127,9 +127,9 @@ float map(vec3 p)
     );
     
     // move the prysm closer
-    float prysmGoopyness=0.2;
-    float prysmSize = 2.0;
-    d = opSmoothUnion(sdTriPrism(p+vec3(0.0,0.0,0.6), vec2(prysmSize)), d, prysmGoopyness);
+    float prysmGoopyness=0.9;
+    float prysmSize = 1.5;
+    d = opSmoothUnion(sdTriPrism(p+vec3(0.0,0.0,1.0), vec2(prysmSize)), d, prysmGoopyness);
     
     
     i=2;
@@ -192,9 +192,9 @@ float map(vec3 p)
             0.5);
     
     return d;
-}
+} 
 
-vec3 calcNormal( in vec3 p )
+vec3 calcNormal(  vec3 p )
 {
     float h = 1e-5; // or some other value
     vec2 k = vec2(1,-1);
@@ -217,11 +217,11 @@ vec3 calcNormal( in vec3 p )
     float depth = 0.0;
     vec3 p;
     
-    for(int i = 0; i < 128; i++) {
+    for(int i = 0; i < 64; i++) {
         p = rayOri + rayDir * depth;
         float dist = map(p);
         depth += dist;
-        if (dist < 1e-6) {
+        if (dist < 1e-7) {
             break;
         }
     }
@@ -236,11 +236,11 @@ vec3 calcNormal( in vec3 p )
     float saturation = 0.8;
     float whiteBalance = 0.5;
     vec3 colorBase = vec3(0.5,3,4);
-    vec3 col = (whiteBalance + saturation * cos((b + colTime) + uv.xyx * 2.0 + colorBase)) * (0.75 + b * 0.35);
-    col *= exp( -depth * 0.005 );
+    vec3 col = (whiteBalance + saturation * cos((b + colTime) + uv.xyx * 2.0 + colorBase)) * (0.95 + b * 0.95);
+    col *= exp( -depth * 0.15 );
     
     // maximum thickness is 2m in alpha channel
-    return vec4(col, 1.0 - (depth - 0.5) / 2.0);
+    return vec4(col, 1.0 );//- (depth - 0.5) / 2.0);
 }
 
 void main() {
