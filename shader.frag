@@ -327,12 +327,14 @@ vec3 calcNormal(  vec3 p )
     vec3 n = calcNormal(p);
     float topBrightness=0.577;
     float b = max(0.0, dot(n, vec3(topBrightness)));
-    float colTime = 5.8;
+    float colTime = 5.8;// nice starting color
+    
     float colShift=(sin(u_time/10.0)+1.0)/2.0*10.0;
-    float saturation = 0.8;
-    float whiteBalance = 0.5;
+    colTime += colShift;
+    float saturation = 0.7;
+    float whiteBalance = 0.4;
     vec3 colorBase = vec3(0.5,3,4);
-    vec3 col = (whiteBalance + saturation * cos((b + colTime+colShift) + uv.xyx * 2.0 + colorBase)) * (0.75 + b * 0.35);
+    vec3 col = (whiteBalance + saturation * cos((b + colTime) + uv.xyx * 2.0 + colorBase)) * (0.75 + b * 0.35);
     col *= exp( -depth * 0.15 );
     
     // maximum thickness is 2m in alpha channel
