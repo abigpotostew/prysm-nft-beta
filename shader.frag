@@ -330,7 +330,7 @@ vec3 calcNormal(  vec3 p )
     float b = max(0.0, dot(n, vec3(topBrightness)));
     float colTime = 5.8;// nice starting color
     
-    float colShift=u_time/8.0;//(sin(u_time/10.0)+1.0)/2.0*10.0;
+    float colShift=u_time/11.0;//(sin(u_time/10.0)+1.0)/2.0*10.0;
     colTime += colShift;
     float saturation = 0.7;
     float whiteBalance = 0.4;
